@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.Text;
 using API.Data;
 using API.Extensions;
@@ -33,5 +34,20 @@ app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localho
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+try
+{
+    var context= services.GetRequiredService<DataContext>();
+    await context.Database.MigrateAsync();
+    await Seed.SeedUsers(context);
+}
+catch(Exception ex)
+{
+    var logger= services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occured during migrations");
+
+}
 
 app.Run();
