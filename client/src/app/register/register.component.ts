@@ -14,7 +14,7 @@ export class RegisterComponent {
   private accountService = inject(AccountService)
   toastr = inject(ToastrService)
   // @Input() usersFromComponent: any;
-  usersFromComponent = input.required<any>()
+  //usersFromComponent = input.required<any>()
   // @Output() cancelRegister = new EventEmitter();
   cancelRegister = output<boolean>();
   model: any = {}
