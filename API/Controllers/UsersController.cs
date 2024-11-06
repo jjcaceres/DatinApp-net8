@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -6,7 +5,6 @@ using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace API.Controllers
 {
@@ -63,6 +61,7 @@ namespace API.Controllers
                 PublicId = result.PublicId
 
             };
+            if (user.Photos.Count == 0) photo.IsMain = true;
             user.Photos.Add(photo);
             if (await userRepository.SaveAllAsync()) return CreatedAtAction(nameof(GetUser), new { username = user.UserName }, mapper.Map<PhotoDto>(photo));
             //return mapper.Map<PhotoDto>(photo);
@@ -92,17 +91,17 @@ namespace API.Controllers
         {
             var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
             if (user is null) return BadRequest("Could not find user");
-            var photo = user.Photos.FirstOrDefault(x=>x.Id== photoId);
-            if(photo is null || photo.IsMain) return BadRequest("This photo cannot be deleted");
+            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            if (photo is null || photo.IsMain) return BadRequest("This photo cannot be deleted");
 
-            if(photo.PublicId is not null)
+            if (photo.PublicId is not null)
             {
                 var result = await photoService.DeletePhotoAync(photo.PublicId);
-                if(result.Error is not null) return BadRequest(result.Error.Message);
+                if (result.Error is not null) return BadRequest(result.Error.Message);
             }
             user.Photos.Remove(photo);
 
-            if(await userRepository.SaveAllAsync()) return Ok();
+            if (await userRepository.SaveAllAsync()) return Ok();
 
             return BadRequest("Problem deleting photo");
 
