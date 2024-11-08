@@ -14,10 +14,12 @@ namespace API.Controllers
     {
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
         {
+            userParams.CurrentUserName = User.GetUsername();
+            var users = await userRepository.GetMembersAsync(userParams);
 
-            var users = await userRepository.GetMembersAsync();
+            Response.AddPaginationHeader(users);
 
             return Ok(users);
         }
